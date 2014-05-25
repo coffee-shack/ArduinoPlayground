@@ -15,9 +15,12 @@
 float RGB[3];
 // int ldrPin = 0;     // LDR in Analog Input 0 to read the ambient light
 // int ambientLight;   // variable to store the value of the ambient light
-int redLed   = 11;  // red LED in Digital Pin 11 (PWM)
+int blueLed   = 11;  // blue LED in Digital Pin 11 (PWM)
 int greenLed = 10;  // green LED in Digital Pin 10 (PWM)
-int blueLed  = 9;   // blue LED in Digital Pin 9 (PWM)
+int redLed  = 9;   // red LED in Digital Pin 9 (PWM)
+
+//Bluetooth 
+byte btdata=0;
 
 void setup(){
   pinMode(redLed,OUTPUT);  // tell arduino it's an output
@@ -28,10 +31,44 @@ void setup(){
   digitalWrite(redLed,LOW);
   digitalWrite(greenLed,LOW);
   digitalWrite(blueLed,LOW);
+  
+  // Bluetooth I/O
+  Serial.begin(9600); //Default connection rate for Bluetooth module
+  
 }
 
-void loop(){
-  for (float x=0;x<PI;x=x+0.00001){
+void loop() {
+
+  switch (btdata) {
+    case 1:
+      digitalWrite(redLed, HIGH);
+      digitalWrite(greenLed,LOW);
+      digitalWrite(blueLed,LOW);
+      Serial.write(1);
+      break;
+    case 2:
+      digitalWrite(greenLed, HIGH);
+      digitalWrite(redLed,LOW);
+      digitalWrite(blueLed,LOW);
+      Serial.write(2);
+      break;
+    case 3:
+      digitalWrite(blueLed, HIGH);
+      digitalWrite(redLed,LOW);
+      digitalWrite(greenLed,LOW);
+      Serial.write(3);
+//    case 4:
+    
+      //transition();
+  }
+}
+void serialEvent(){
+btdata = Serial.read();
+}
+
+
+void transition(){
+  for (float x=0;x<PI;x=x+0.0001){
     RGB[0]=255*abs(sin(x*(180/PI)));           // calculate the brightness for the red led
     RGB[1]=255*abs(sin((x+PI/3)*(180/PI)));    // calculate the brightness for the green led
     RGB[2]=255*abs(sin((x+(2*PI)/3)*(180/PI)));// calculate the brightness for the blue led
@@ -41,6 +78,17 @@ void loop(){
       analogWrite(redLed,RGB[0]);
       analogWrite(greenLed,RGB[1]);
       analogWrite(blueLed,RGB[2]);
+      if(x==1){
+        Serial.write(1);
+      }
+      if(x==2){
+        Serial.write(2);
+      }
+        
+      if(btdata != 4){
+        Serial.write(5);
+        return;
+      }
     //}
     //else{
     // digitalWrite(redLed,LOW);
@@ -64,3 +112,4 @@ void loop(){
     delay(1);
   }
 }
+
